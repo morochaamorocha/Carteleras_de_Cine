@@ -18,6 +18,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.SearchView;
+import android.widget.Toast;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -67,7 +68,9 @@ public class MainActivity extends Activity implements SearchView.OnQueryTextList
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-                seleccionarCine(position);
+                //seleccionarCine(position);
+                Toast.makeText(MainActivity.this, "Has presionado la opción " + position, Toast.LENGTH_SHORT).show();
+                drawerLayout.closeDrawer(listaCines);
             }
         });
 
@@ -86,7 +89,7 @@ public class MainActivity extends Activity implements SearchView.OnQueryTextList
         searchView = (SearchView)menu.findItem(R.id.buscar).getActionView();
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
         searchView.setOnQueryTextListener(this);
-        listaCines.setTextFilterEnabled(true);
+
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -96,6 +99,7 @@ public class MainActivity extends Activity implements SearchView.OnQueryTextList
 
         boolean drawerAbierto = drawerLayout.isDrawerOpen(listaCines);
         menu.findItem(R.id.actualizar).setVisible(!drawerAbierto);
+        menu.findItem(R.id.buscar).setVisible(!drawerAbierto);
 
         return super.onPrepareOptionsMenu(menu);
     }
@@ -220,10 +224,10 @@ public class MainActivity extends Activity implements SearchView.OnQueryTextList
     public boolean onQueryTextChange(String newText) {
 
         if (TextUtils.isEmpty(newText)){
-            listaCines.clearTextFilter();
+            /*TODO: Limpiar el filtro de busqueda*/
         }
         else{
-            listaCines.setFilterText(newText);
+            /*TODO: filtrar la lista*/
         }
         return true;
     }
