@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 
 
@@ -103,7 +104,6 @@ public class MainActivity extends Activity implements SearchView.OnQueryTextList
         searchView = (SearchView)menu.findItem(R.id.buscar).getActionView();
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
         searchView.setOnQueryTextListener(this);
-
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -203,7 +203,8 @@ public class MainActivity extends Activity implements SearchView.OnQueryTextList
         try {
 
             URL url1 = new URL(url);
-            stream = url1.openStream();
+            URLConnection conn = url1.openConnection();
+            stream = conn.getInputStream();
             Bitmap bitmap = BitmapFactory.decodeStream(stream);
             cartelera.get(p).setCartel(bitmap);
 
@@ -245,7 +246,8 @@ public class MainActivity extends Activity implements SearchView.OnQueryTextList
 
             try {
                 URL url = new URL(URL_RSS);
-                stream = url.openStream();
+                URLConnection conn = url.openConnection();
+                stream = conn.getInputStream();
                 rss = stream.toString();
                 Log.i("RSS0", rss);
 
