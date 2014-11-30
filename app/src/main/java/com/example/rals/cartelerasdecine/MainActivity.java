@@ -6,10 +6,12 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Xml;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,6 +19,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.SearchView;
 import android.widget.Toast;
 
@@ -39,11 +42,14 @@ public class MainActivity extends Activity implements SearchView.OnQueryTextList
     private final String URL_RSS = "http://rss.sensacine.com/cine/encartelera?format=xml";
     private SearchManager searchManager;
     private SearchView searchView;
+    private ProgressBar progressBar;
+    private String rss;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
 
         drawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
         listaCines = (ListView)findViewById(R.id.menu_lateral);
@@ -68,14 +74,22 @@ public class MainActivity extends Activity implements SearchView.OnQueryTextList
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-                //seleccionarCine(position);
-                Toast.makeText(MainActivity.this, "Has presionado la opción " + position, Toast.LENGTH_SHORT).show();
+                seleccionarCine(position);
+                //Toast.makeText(MainActivity.this, "Has presionado la opción " + position, Toast.LENGTH_SHORT).show();
                 drawerLayout.closeDrawer(listaCines);
             }
         });
 
+        progressBar = (ProgressBar)findViewById(R.id.progressBar);
+        progressBar.setIndeterminate(true);
+        progressBar.setVisibility(View.GONE);
+
+        descargarRSS();
+
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
+
+
 
     }
 
@@ -113,7 +127,7 @@ public class MainActivity extends Activity implements SearchView.OnQueryTextList
 
         switch (item.getItemId()){
             case R.id.actualizar:
-                /*TODO: Actualizar contenido del fragment*/
+                descargarRSS();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -185,6 +199,7 @@ public class MainActivity extends Activity implements SearchView.OnQueryTextList
     private void descargarImagen(String url, int p){
 
         InputStream stream = null;
+
         try {
 
             URL url1 = new URL(url);
@@ -198,21 +213,10 @@ public class MainActivity extends Activity implements SearchView.OnQueryTextList
         }
     }
 
-    private String descargarRSS(){
+    private void descargarRSS(){
 
-        InputStream stream = null;
-        String rss = null;
-
-        try {
-            URL url = new URL(URL_RSS);
-            stream = url.openStream();
-            rss = stream.toString();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return rss;
+        DescargarRSSTask descargarRSSTask = new DescargarRSSTask();
+        descargarRSSTask.execute();
     }
 
     @Override
@@ -230,5 +234,47 @@ public class MainActivity extends Activity implements SearchView.OnQueryTextList
             /*TODO: filtrar la lista*/
         }
         return true;
+    }
+
+    private class DescargarRSSTask extends AsyncTask<Void, Void, Boolean>{
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+
+            InputStream stream = null;
+
+            try {
+                URL url = new URL(URL_RSS);
+                stream = url.openStream();
+                rss = stream.toString();
+                Log.i("RSS0", rss);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            if (rss != null){
+
+                leerRSS(rss);
+                return true;
+            }
+            else return false;
+
+        }
+
+        @Override
+        protected void onPreExecute() {
+            progressBar.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            progressBar.setVisibility(View.GONE);
+
+            if (!aBoolean){
+                Toast.makeText(getApplication(), "Error al realizar la descarga", Toast.LENGTH_SHORT).show();
+            }
+        }
+
     }
 }
