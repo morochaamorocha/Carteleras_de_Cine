@@ -28,6 +28,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.net.URL;
 import java.net.URLConnection;
@@ -146,7 +147,7 @@ public class MainActivity extends Activity implements SearchView.OnQueryTextList
         drawerLayout.closeDrawer(listaCines);
     }
 
-    private void leerRSS(String RSS){
+    private void leerRSS(InputStream RSS){
         XmlPullParser parser = Xml.newPullParser();
         int evento, item = 0;
         boolean aux = false;
@@ -154,7 +155,7 @@ public class MainActivity extends Activity implements SearchView.OnQueryTextList
         cartelera = new ArrayList<Pelicula>();
 
         try {
-            parser.setInput(new StringReader(RSS));
+            parser.setInput(new InputStreamReader(RSS));
             evento = parser.getEventType();
 
             while (evento != XmlPullParser.END_DOCUMENT && item <= 5){
@@ -248,19 +249,12 @@ public class MainActivity extends Activity implements SearchView.OnQueryTextList
                 URL url = new URL(URL_RSS);
                 URLConnection conn = url.openConnection();
                 stream = conn.getInputStream();
-                rss = stream.toString();
-                Log.i("RSS0", rss);
-
             } catch (IOException e) {
                 e.printStackTrace();
             }
+                leerRSS(stream);
 
-            if (rss != null){
-
-                leerRSS(rss);
-                return true;
-            }
-            else return false;
+            return true;
 
         }
 
@@ -272,10 +266,6 @@ public class MainActivity extends Activity implements SearchView.OnQueryTextList
         @Override
         protected void onPostExecute(Boolean aBoolean) {
             progressBar.setVisibility(View.GONE);
-
-            if (!aBoolean){
-                Toast.makeText(getApplication(), "Error al realizar la descarga", Toast.LENGTH_SHORT).show();
-            }
         }
 
     }
